@@ -1,0 +1,73 @@
+#!/bin/bash
+# From https://raw.githubusercontent.com/shweppsie/nagios-plugins/master/check_dyndns
+
+VERSION="1.0"
+# Changelog
+# v1.0	Forked from initial plugin
+#	- Documented the code
+#	- Change from dyndns.com to ipify.org for public IP lookup,
+#	  to remove the egrep and speed up the process
+#	- Implemented arguments to use another DNS server and
+#	  optionally restart ddclient if the check fails
+#	- Implementation currently limited to IPv4
+
+case $1 in
+'-H'|'--host')
+
+  # Check if a hostname to check was provided
+  DNSNAME="$2"
+  if [ "${DNSNAME}" == "" ]; then
+    echo "DNS UNKNOWN: Please supply a DNS Name to lookup"
+    exit 3
+  fi
+
+  # Get the current public IPv4 address
+  IPADDR=`wget -4 -q -O - https://api.ipify.org`
+  if [ $? -ne 0 ]; then
+    echo "DNS WARNING: Cannot detect public IPv4 address!"
+    exit 1
+  fi
+
+  # If a DNS server was provided as argument, use it instead of the Google
+  # public DNS server
+  if [[ "$3" == "-s" || "$3" == "--server" ]]; then
+    DNSSERVER="$4"
+  else
+    DNSSERVER="8.8.8.8"
+  fi
+
+  # Check if the ddns record and the current public IPv4 address match
+  # using the Nagios check_dns plugin
+  MSG=`/usr/lib64/nagios/plugins/check_dns -H ${DNSNAME} -s ${DNSSERVER} -a ${IPADDR}`
+  RES=$?
+
+  OUT=`echo "$MSG" | egrep '^DNS CRITICAL.*'`
+  if [ $? -ne 0 ]; then
+    echo "$MSG"
+    exit $RES
+  else
+    echo "DYNDNS CRITICAL ${DNSNAME} does not resolve to ${IPADDR}, trying to update dyndns now"
+    # Attempt to restart ddclient if the restart argument was provided
+    if [[ "$3" == "-r" || "$3" == "--restart" || "$5" == "-r" || "$5" == "--restart" ]]; then
+      sudo service ddclient restart &> /dev/null
+    fi
+    exit 2
+  fi
+
+  ;;
+*)
+  echo "
+  check_dyndns, version $VERSION
+  Nagios plugin by Eric Viseur <eric.viseur@gmail.com, github.com/sephiroth1395>
+  based on work from  gitub.com/shweppsie
+
+  Use: $0 -H host [ -s dns server ] [ -r ]
+
+  -H|--host	Hostname to check
+  -s|--server	DNS server to use.  Default: 8.8.8.8
+  -r|--restart	Attempt a ddclient service restart if there is an IP/name mismatch
+
+"
+  exit 3
+  ;;
+esac

@@ -28,3 +28,22 @@ Options:
   -c CRITICAL, --critical=CRITICAL
                         Critical threshold. Default [10]
 ```
+
+### check_dyndns
+#### Description
+This plugin checks if the provided dynamic DNS hostname matches the current public IPv4 address of the host that runs the plugin.  It can optionally attempt to restart ddclient if there is a mismatch.
+
+This last feature requires that nrpe can launch command as *sudo*.  This can have sudoers and SELinux implications, depending on the distribution you're using.
+
+This plugin requires *wget* and the Nagios *check_dns* plugin.
+If you're a CentOS/RHEL user and have SELinux enabled, you may need an additional SELinux policy to allow NRPE to invoke wget and do HTTP requests.  The *check_dyndns.te* file contains a policy that will allow that specific action.
+
+#### Usage
+
+```
+  Use: /usr/lib64/nagios/plugins/check_dyndns -H host [ -s dns server ] [ -r ]
+
+  -H|--host     Hostname to check
+  -s|--server   DNS server to use.  Default: 8.8.8.8
+  -r|--restart  Attempt a ddclient service restart if there is an IP/name mismatch
+```

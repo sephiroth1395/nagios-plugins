@@ -1,0 +1,12 @@
+
+module check_dyndns 1.0;
+
+require {
+	type nrpe_t;
+	type http_port_t;
+	class tcp_socket name_connect;
+}
+
+#============= nrpe_t ==============
+
+allow nrpe_t http_port_t:tcp_socket name_connect;

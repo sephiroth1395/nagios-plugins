@@ -47,3 +47,33 @@ If you're a CentOS/RHEL user and have SELinux enabled, you may need an additiona
   -s|--server   DNS server to use.  Default: 8.8.8.8
   -r|--restart  Attempt a ddclient service restart if there is an IP/name mismatch
 ```
+
+### check_voo
+#### Description
+This plugin parses the HTML output of the Voo modem web interface and extracts the SNR (Signal to Noise) information for all the downtream channels. It can be useful to track connectivity issues as well as monitor the impact of works on your line.
+
+I can only check it with the Technicolor as it is the one I have but it is my understanding the WebUI is the same on the Netgear modems, so it should work. If that's not the case, I'm happy to assist to make it more universal.
+
+Always check github for the latest release.
+
+#### Usage
+
+```
+usage: check_voo.py [-h] [-H MODEMADDRESS] [-c CONFIGFILE] [--perfdata] [-v]
+
+Nagios-compliant plugin to check the connectivity status on a VOO Technicolor modem in bridge mode
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -H MODEMADDRESS, --host MODEMADDRESS
+                        IP address of the VOO modem. Default [192.168.100.1]
+  -c CONFIGFILE, --config-file CONFIGFILE
+                        Configuration file location Default [check_voo.yml]
+  --perfdata            Append perfdata to the plugin output.
+  -v, --verbose         Produce verbose output.
+
+The configuration file is expected to present the following contents:
+
+login: 
+password: 
+```

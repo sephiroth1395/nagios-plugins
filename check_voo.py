@@ -9,6 +9,7 @@ import mechanize
 import array
 import argparse
 import yaml
+import os
 from lxml import etree
 
 
@@ -118,6 +119,9 @@ if downAcquired == "Locked":
     if connectionState == "OK":
         
         perfdata = ""
+	# Populate arrays with the properties of each channel
+        downChannels = []
+        upChannels = []
 
         # Starting with Element 2, connInfoDownstream contains each downstream channel
         for i in range(2, 18):
@@ -129,13 +133,9 @@ if downAcquired == "Locked":
             snr = connInfoDownstream[i][7].text.lstrip()
             snr = snr.replace(" dB","")
             
+            downChannels.append([modulation, baudrate, power, snr])
             perfdata += "'down_" + str(j) + "_pwr'=" + power + ";;;; 'down_" + str(j) + "_snr'=" + snr + ";;;; "
 
-        if args.verbose:            
-            verboseData += 'Downstream channels info'
-            for i in downChannels:
-                verboseData += i
-            
         # Starting with Element 2, connInfoUpstream contains each downstream channel
         for i in range(2, 6):
             j = i-1
@@ -143,13 +143,9 @@ if downAcquired == "Locked":
             baudrate = connInfoUpstream[i][4].text
             power = connInfoUpstream[i][6].text.lstrip()
             power = power.replace(" dBmV","")
-                
+            
+            upChannels.append([modulation, baudrate, power])
             perfdata += "'up_" + str(j) + "_pwr'=" + power + ";;;; "
-
-        if args.verbose:
-            verboseData += 'Upstream channels info'
-            for i in upChannels:
-                verboseData += i
 
     else:
         output = "CRITICAL - Connection issue"
@@ -163,5 +159,14 @@ returnCode=0
 if args.perfdata: output = output + '|' + perfdata
 
 print(output)
-if args.verbose: print(verboseData)
+
+if args.verbose:
+  print("\nDownstream channels")
+  for i in downChannels:
+    print("\t%s" % i)
+  print("\nUpstream channels")
+  for i in upChannels:
+    print("\t%s" % i)
+
 exit(returnCode)
+

@@ -3,7 +3,7 @@
 - [nagios-plugins](#nagios-plugins)
   - [Overview](#overview)
   - [Plugins](#plugins)
-    - [check_epson_wf3520.pl](#check_epson_wf3520pl)
+    - [check_epson_wf3520](#check_epson_wf3520)
       - [Description](#description)
       - [Usage](#usage)
     - [check_dyndns](#check_dyndns)
@@ -19,7 +19,7 @@ This repo contains Nagios plugins that I've either written from scratch or adapt
 
 ## Plugins
 
-### check_epson_wf3520.pl
+### check_epson_wf3520
 #### Description
 This plugin is designed specifically for the Epson WF-3520 multifunction printer.  It may or may not work with other Epson printers with adaptations.  I'm more than happy to adapt it based on pull requests to cover more devices.
 It fetches the status of the 4 ink cartridges and the waste container by parsing the contents of the device's web interface.

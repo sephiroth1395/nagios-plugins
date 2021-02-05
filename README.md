@@ -1,5 +1,18 @@
 # nagios-plugins
 
+- [nagios-plugins](#nagios-plugins)
+  - [Overview](#overview)
+  - [Plugins](#plugins)
+    - [check_epson_wf3520.pl](#check_epson_wf3520pl)
+      - [Description](#description)
+      - [Usage](#usage)
+    - [check_dyndns](#check_dyndns)
+      - [Description](#description-1)
+      - [Usage](#usage-1)
+    - [check_voo](#check_voo)
+      - [Description](#description-2)
+      - [Usage](#usage-2)
+
 ## Overview
 
 This repo contains Nagios plugins that I've either written from scratch or adapted from pre-existing scripts to suit my needs.

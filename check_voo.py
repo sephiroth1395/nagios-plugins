@@ -7,28 +7,23 @@
 
 import mechanize
 import array
+import argparse
+import yaml
 from lxml import etree
-from argparse import ArgumentPaser
-
-###
-# Variables
-vooLogin="voo"
-vooPassword="QYBPMGGJ"
-###
 
 
 # ---- constants --------------------------------------------------------------
 
 HOST_ADDRESS = '192.168.100.1'
-CONFIG_FILE = 'checyk_voo.yml'
+CONFIG_FILE = 'check_voo.yml'
 
 # ---- parse the arguments ----------------------------------------------------
 
 def create_args():
-  parser = ArgumentParser(
+  parser = argparse.ArgumentParser(
       formatter_class=argparse.RawDescriptionHelpFormatter,
       description = 'Nagios-compliant plugin to check the connectivity status on a VOO Technicolor modem in bridge mode',
-      epilog = 'zgeg.'
+      epilog = "The configuration file is expected to present the following contents:\n\nlogin: <your Voo modem login>\npassword: <your Voo modem password>",
       )
 
   parser.add_argument("-H", "--host", action = "store",

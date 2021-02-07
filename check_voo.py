@@ -35,8 +35,6 @@ def create_args():
     dest = 'configFile', default = CONFIG_FILE,
     help = ("Configuration file location Default [%s]" % CONFIG_FILE))
 
-# TODO: Add footer with the configuration file structure
-
   parser.add_argument("--perfdata", action = 'store_true',
     help = 'Append perfdata to the plugin output.')
 
@@ -92,7 +90,7 @@ except:
 
 # Go to the connection statistics page
 try:
-    br.open("http://192.168.100.1/RgConnect.asp")
+    br.open('http://' + args.modemAddress + '/RgConnect.asp")
 except:
     print("UNKNOWN - Cannot open connection info")
     exit(3)

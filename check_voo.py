@@ -102,9 +102,10 @@ def get_creds_from_vault(configFile):
   
   # Get the modem credentials from the provided path
   try:
-    vaultData = vault.secrets.kv.v2.read_secret_version(path=vaultPath, mountpoint=vaultMountPoint)
-    print(vaultData['data']['data'])
-    exit(0)
+    vaultData = vault.secrets.kv.v2.read_secret_version(path=vaultPath, mount_point=vaultMountPoint)
+    vooLogin = vaultData['data']['data']['login']
+    vooPassword = vaultData['data']['data']['password']
+    return(vooLogin, vooPassword)
   except:
     print("CRITICAL - Error getting the modem credentials from the KV path %s/%s" % (vaultMountPoint,vaultPath))
     exit(2)

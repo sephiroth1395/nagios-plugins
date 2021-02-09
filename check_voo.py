@@ -24,7 +24,7 @@ def create_args():
   parser = argparse.ArgumentParser(
       formatter_class=argparse.RawDescriptionHelpFormatter,
       description = 'Nagios-compliant plugin to check the connectivity status on a VOO Technicolor modem in bridge mode',
-      epilog = "The configuration file is expected to present the following contents:\n\nlogin: <your Voo modem login>\npassword: <your Voo modem password>",
+      epilog = "When not using Vault, the configuration file is expected to present the following contents:\n\nlogin: <your Voo modem login>\npassword: <your Voo modem password>\n\n\nIf using Vault:\n\nserver: <Vault server URL>\nrole: <AppRole role-id>\nsecret: <AppRole secret-id>\nlocation: <A valid kv secret path>\n\nRefer to README.md in https://github.com/sephiroth1395/nagios-plugins for more info on Vault usage.",
       )
 
   parser.add_argument("-H", "--host", action = "store",
@@ -40,6 +40,9 @@ def create_args():
 
   parser.add_argument("-v", "--verbose", action = 'store_true',
     help = 'Produce verbose output.')
+
+  parser.add_argument("-V", '--use-vault', action = 'store_true',
+    dest = 'useVault', help = 'Get the modem credentials from HashiCorp Vault.')
 
   args = parser.parse_args()
   return args
@@ -64,6 +67,48 @@ def parse_config(configFile):
     print("CRITICAL - Configuration file %s does not exist" % configFile)
     exit(2)
 
+# ---- get the modem credentials from Vault -----------------------------------
+
+def get_creds_from_vault(configFile):
+
+  # Check if the config file exists
+  if os.path.exists(configFile):
+    # Attempt to read the config file contents
+    try:
+      stream = open(configFile, 'r')
+      settings = yaml.load(stream, Loader=yaml.BaseLoader)
+      vaultServer = settings['server']
+      vaultRole = settings['role']
+      vaultSecret = settings['secret']
+      vaultDataLocation = settings['location']
+    except:
+      print("CRITICAL - Error reading the configuration file %s" % configFile)
+      exit(2)
+  else:
+    print("CRITICAL - Configuration file %s does not exist" % configFile)
+    exit(2)
+
+  # Open a connection to the Vault server
+  try:
+    vault = hvac.Client(url=vaultServer)
+    vault.auth.approle.login(
+      role_id=vaultRole,
+      secret_id=vaultSecret,
+    )
+  except:
+    print("CRITICAL - Error connecting to Vault server %s" % vaultServer)
+    exit(2)
+  
+  # Get the modem credentials from the provided path
+  try:
+    data = vault.secrets.kv.v2.read_secret_version(path=vaultLocation)
+    print(data)
+    exti(0)
+  except:
+    print("CRITICAL - Error getting the modem credentials from the KV location %s" % vaultLocation)
+    exit(2)
+
+
 # ---- main routine -----------------------------------------------------------
 # ---- This plugin leverages the mechanize python module to mimic the      ----
 # ---- behaviour of a human user.  Sorry for the messy code but the        ----
@@ -71,7 +116,14 @@ def parse_config(configFile):
 # -----------------------------------------------------------------------------
 
 args = create_args()
-(vooLogin, vooPassword) = parse_config(args.configFile)
+
+# Depending on whether or not Vault is required to be used, the credentials
+# are fetched differently
+if args.useVault:
+  import hvac
+  (vooLogin, vooPassword) = get_creds_from_vault(args.configFile)
+else:
+  (vooLogin, vooPassword) = parse_config(args.configFile)
 
 br = mechanize.Browser()
 
@@ -90,7 +142,7 @@ except:
 
 # Go to the connection statistics page
 try:
-    br.open('http://' + args.modemAddress + '/RgConnect.asp")
+    br.open('http://' + args.modemAddress + '/RgConnect.asp')
 except:
     print("UNKNOWN - Cannot open connection info")
     exit(3)

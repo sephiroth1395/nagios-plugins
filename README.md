@@ -69,10 +69,23 @@ I can only check it with the Technicolor as it is the one I have but it is my un
 
 Always check github for the latest release.
 
+This plugin can be fetch the modem credentials from an `HashiCorp Vault ` KV v2 secrets engine instead of having the credentials hardcoded in a YAML file.
+
+If you want to use Vault (These instructions assume you're familiar with how Vault works):
+* Enable the KV v2 secrets engine on your server if not done already.
+* Store the credentials as `login` and `password` metadata in your path of choice inside the KV v2 mount point.
+* Create a policy that enables the `read` operation on the `<your KV v2 mount point>/data/<your chosen path inside the mount point>` target
+* Enable the AppRole auth backend on your server if not already done.
+* Add an AppRole associated with the previously mentioned policy.
+* Fill in the YAML config file accordingly, following the indications below.
+
+The plugin assumes TLS connection is established with Vault.
+
 #### Usage
 
 ```
 usage: check_voo.py [-h] [-H MODEMADDRESS] [-c CONFIGFILE] [--perfdata] [-v]
+                    [-V]
 
 Nagios-compliant plugin to check the connectivity status on a VOO Technicolor modem in bridge mode
 
@@ -84,9 +97,19 @@ optional arguments:
                         Configuration file location Default [check_voo.yml]
   --perfdata            Append perfdata to the plugin output.
   -v, --verbose         Produce verbose output.
+  -V, --use-vault       Get the modem credentials from HashiCorp Vault.
 
-The configuration file is expected to present the following contents:
+When not using Vault, the configuration file is expected to present the following contents:
 
-login: 
-password: 
+login: <your Voo modem login>
+password: <your Voo modem password>
+
+If using Vault:
+
+server: <Vault server URL>
+role: <AppRole role-id>
+secret: <AppRole secret-id>
+mountpoint: <The mount point of the target KV v2 engine>
+path: <The path inside the mountpoint that contains the modem credentials>
+
 ```

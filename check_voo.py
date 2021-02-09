@@ -24,7 +24,7 @@ def create_args():
   parser = argparse.ArgumentParser(
       formatter_class=argparse.RawDescriptionHelpFormatter,
       description = 'Nagios-compliant plugin to check the connectivity status on a VOO Technicolor modem in bridge mode',
-      epilog = "When not using Vault, the configuration file is expected to present the following contents:\n\nlogin: <your Voo modem login>\npassword: <your Voo modem password>\n\n\nIf using Vault:\n\nserver: <Vault server URL>\nrole: <AppRole role-id>\nsecret: <AppRole secret-id>\nlocation: <A valid kv secret path>\n\nRefer to README.md in https://github.com/sephiroth1395/nagios-plugins for more info on Vault usage.",
+      epilog = "When not using Vault, the configuration file is expected to present the following contents:\n\nlogin: <your Voo modem login>\npassword: <your Voo modem password>\n\n\nIf using Vault:\n\nserver: <Vault server URL>\nrole: <AppRole role-id>\nsecret: <AppRole secret-id>\nmountpoint: <The mount point of the target KV v2 engine>\npath: <The path inside the mountpoint that contains the modem credentials>\n\nRefer to README.md in https://github.com/sephiroth1395/nagios-plugins for more info on Vault usage.\n",
       )
 
   parser.add_argument("-H", "--host", action = "store",
@@ -80,7 +80,8 @@ def get_creds_from_vault(configFile):
       vaultServer = settings['server']
       vaultRole = settings['role']
       vaultSecret = settings['secret']
-      vaultDataLocation = settings['location']
+      vaultMountPoint = settings['mountpoint']
+      vaultPath = settings['path']
     except:
       print("CRITICAL - Error reading the configuration file %s" % configFile)
       exit(2)
@@ -101,11 +102,11 @@ def get_creds_from_vault(configFile):
   
   # Get the modem credentials from the provided path
   try:
-    data = vault.secrets.kv.v2.read_secret_version(path=vaultLocation)
-    print(data)
-    exti(0)
+    vaultData = vault.secrets.kv.v2.read_secret_version(path=vaultPath, mountpoint=vaultMountPoint)
+    print(vaultData['data']['data'])
+    exit(0)
   except:
-    print("CRITICAL - Error getting the modem credentials from the KV location %s" % vaultLocation)
+    print("CRITICAL - Error getting the modem credentials from the KV location %s" % vaultDataLocation)
     exit(2)
 
 

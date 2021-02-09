@@ -106,7 +106,7 @@ def get_creds_from_vault(configFile):
     print(vaultData['data']['data'])
     exit(0)
   except:
-    print("CRITICAL - Error getting the modem credentials from the KV location %s" % vaultDataLocation)
+    print("CRITICAL - Error getting the modem credentials from the KV path %s/%s" % (vaultMountPoint,vaultPath))
     exit(2)
 
 

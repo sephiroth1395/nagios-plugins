@@ -47,7 +47,7 @@ def end_script(code, message):
   exit(code)
 
 
-# ---- convert secinds into a human readable time span ------------------------
+# ---- convert seconds into a human readable time span ------------------------
 
 def secsToReadableString(secs):
     
